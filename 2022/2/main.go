@@ -10,9 +10,11 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
+var m = map[string]map[string]int{}
+
 func main() {
 	part1()
-	// part2()
+	part2()
 }
 
 func sortSlice[T constraints.Ordered](s []T) {
@@ -69,13 +71,32 @@ func part1() {
 }
 
 func part2() {
+	m["A"] = map[string]int{}
+	m["B"] = map[string]int{}
+	m["C"] = map[string]int{}
+
+	m["A"]["X"] = 0 + 3
+	m["A"]["Y"] = 3 + 1
+	m["A"]["Z"] = 6 + 2
+
+	m["B"]["X"] = 0 + 1
+	m["B"]["Y"] = 3 + 2
+	m["B"]["Z"] = 6 + 3
+
+	m["C"]["X"] = 0 + 2
+	m["C"]["Y"] = 3 + 3
+	m["C"]["Z"] = 6 + 1
+
 	fileName := "input.txt"
 	file, _ := os.Open(fileName)
 	defer file.Close()
+	score := 0
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		s := scanner.Text()
-		fmt.Println(s)
+		arr := strings.Split(s, "")
+		score += m[arr[0]][arr[2]]
 	}
 
+	fmt.Println(score)
 }
