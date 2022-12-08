@@ -13,8 +13,8 @@ import (
 )
 
 func main() {
-	part1()
-	// part2()
+	// part1()
+	part2()
 }
 
 func sortSlice[T constraints.Ordered](s []T) {
@@ -40,6 +40,19 @@ func (c *column) pop() string {
 	return s
 }
 
+func (c *column) popTwo(n int) []string {
+	fmt.Printf("Popping from: %v, n: %v\n", *c, n)
+	var pops []string
+
+	for i := 0; i < n; i++ {
+		pops = append(pops, (*c)[i])
+	}
+	*c = (*c)[n:]
+	fmt.Printf("Popped: %v\n", pops)
+	fmt.Printf("Left with: %v\n", *c)
+	return pops
+}
+
 type columns struct {
 	stacks map[string]*column
 	size   int
@@ -60,6 +73,14 @@ func (c *columns) doMove(move move) {
 	for i := 0; i < move.num; i++ {
 		s := c.stacks[move.from].pop()
 		c.stacks[move.to].push(s)
+	}
+}
+
+func (c *columns) doMoveTwo(move move) {
+	pops := c.stacks[move.from].popTwo(move.num)
+	for i := len(pops) - 1; i >= 0; i-- {
+		fmt.Println(i)
+		c.stacks[move.to].push(pops[i])
 	}
 }
 
@@ -111,7 +132,62 @@ func part1() {
 		fmt.Println(line)
 		for i := range line {
 			if string(line[i]) == "[" {
-				fmt.Printf("i: %v, label: %v, value: %s\n", i, i/4+1, string(line[i+1]))
+				// fmt.Printf("i: %v, label: %v, value: %s\n", i, i/4+1, string(line[i+1]))
+				columns.stacks[fmt.Sprintf("%v", i/4+1)].addToLast(string(line[i+1]))
+			}
+		}
+	}
+
+	// mar, _ := json.Marshal(columns.stacks)
+	// fmt.Println(string(mar))
+	moves := []move{}
+	for _, line := range movesLines {
+		arr := strings.Split(line, " ")
+		num, _ := strconv.Atoi(arr[1])
+		move := move{
+			from: arr[3],
+			to:   arr[5],
+			num:  num,
+		}
+		moves = append(moves, move)
+	}
+
+	for _, move := range moves {
+		columns.doMove(move)
+	}
+	s := columns.getTopLayer()
+	fmt.Println(s)
+}
+func part2() {
+	fileName := "input.txt"
+	file, _ := os.Open(fileName)
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	cratesLines := []string{}
+	movesLines := []string{}
+	toggle := false
+	for scanner.Scan() {
+		s := scanner.Text()
+		if s == "" {
+			toggle = true
+		}
+		if !toggle && s != "" {
+			cratesLines = append(cratesLines, s)
+		} else if toggle && s != "" {
+			movesLines = append(movesLines, s)
+		}
+	}
+
+	lables := strings.Fields(cratesLines[len(cratesLines)-1])
+
+	n, _ := strconv.Atoi(lables[len(lables)-1])
+	cratesLines = cratesLines[:len(cratesLines)-1]
+	columns := newColumns(n)
+	for _, line := range cratesLines {
+		// fmt.Println(line)
+		for i := range line {
+			if string(line[i]) == "[" {
+				// fmt.Printf("i: %v, label: %v, value: %s\n", i, i/4+1, string(line[i+1]))
 				columns.stacks[fmt.Sprintf("%v", i/4+1)].addToLast(string(line[i+1]))
 			}
 		}
@@ -132,17 +208,11 @@ func part1() {
 	}
 
 	for _, move := range moves {
-		columns.doMove(move)
+		columns.doMoveTwo(move)
+		fmt.Println("Full picture: ")
+		mar, _ := json.Marshal(columns.stacks)
+		fmt.Println(string(mar))
 	}
 	s := columns.getTopLayer()
 	fmt.Println(s)
-}
-func part2() {
-	// fileName := "input.txt"
-	// file, _ := os.Open(fileName)
-	// defer file.Close()
-	// scanner := bufio.NewScanner(file)
-	// for scanner.Scan() {
-	// 	s := scanner.Text()
-	// }
 }
