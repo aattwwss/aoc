@@ -1,0 +1,57 @@
+init root as current
+handling ls
+doProcessFiles
+handle files here
+doProcessFiles
+handle files here
+14848514
+doProcessFiles
+handle files here
+8504156
+doProcessFiles
+handle files here
+Set doProcessFiles back to false
+handling ls
+doProcessFiles
+handle files here
+doProcessFiles
+handle files here
+29116
+doProcessFiles
+handle files here
+2557
+doProcessFiles
+handle files here
+62596
+Set doProcessFiles back to false
+handling ls
+doProcessFiles
+handle files here
+584
+Set doProcessFiles back to false
+handling cd. s: $ cd ..
+handling cd. s: $ cd d
+handling cd into directoryd
+handling ls
+doProcessFiles
+handle files here
+4060174
+doProcessFiles
+handle files here
+8033020
+doProcessFiles
+handle files here
+5626152
+doProcessFiles
+handle files here
+7214296
+[]
+name: a size is 0
+
+name: d size is 0
+
+name: e size is 0
+
+name: $ cd / size is 0
+
+0
