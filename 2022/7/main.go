@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -106,15 +107,24 @@ func part1() {
 	}
 	m := root.GetDirSizeMap()
 	total := 0
+	toDelete := []int{}
+	requiredSize := 30000000 - (70000000 - m["/"])
 	for k, v := range m {
 		if v <= 100000 {
 			fmt.Printf("key: %s value: %v\n", k, v)
 			total += v
 		}
+		if v >= requiredSize {
+			toDelete = append(toDelete, v)
+		}
 	}
 	fmt.Print("Total: ")
 	fmt.Println(total)
 	// fmt.Println(m)
+	// part 2 here
+	sort.Ints(toDelete)
+	fmt.Println(toDelete[0])
+
 }
 
 func part2() {
