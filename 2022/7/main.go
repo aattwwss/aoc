@@ -9,118 +9,112 @@ import (
 	"strings"
 )
 
-type AFile struct {
-	Name string
-	Size int
-}
-
-func newAFile(name string, size int) AFile {
-	return AFile{name, size}
-}
-
-type Dir struct {
-	Name  string
-	Files *[]AFile
-	Dirs  *[]Dir
-	Prev  *Dir
-}
-
-func newDir(name string, prev *Dir) Dir {
-	return Dir{name, &[]AFile{}, &[]Dir{}, prev}
-}
-
-func (d Dir) getTotalSize(threshold int) int {
-	var size int
-	for _, file := range *d.Files {
-		if size >= threshold {
-			size += file.Size
-		}
-	}
-	for _, dir := range *d.Dirs {
-		size += dir.getTotalSize(threshold)
-	}
-	return size
-}
-
-func handleCD(prev *Dir, curr *Dir, s string) {
-	arr := strings.Split(s, " ")
-	if arr[2] == ".." {
-		temp := curr.Prev
-		curr.Prev = prev
-		prev = temp
-		return
-	} else {
-		var temp *Dir
-		prev = curr
-		for _, dir := range *curr.Dirs {
-			if dir.Name == arr[2] {
-				temp = &dir
-			}
-		}
-		curr = temp
-		*curr.Dirs = append(*curr.Dirs, newDir(arr[2], curr))
-	}
-
-}
-
-func handleFileOrDir(curr *Dir, first string, name string) {
-	if first == "dir" {
-		fmt.Println("handling dir")
-		*curr.Dirs = append(*curr.Dirs, newDir(name, curr))
-	} else {
-		fmt.Println("handling files")
-		size, _ := strconv.Atoi(first)
-		*curr.Files = append(*curr.Files, newAFile(name, size))
-	}
-}
-
 func main() {
 	part1()
 	// part2()
 }
 
+type Dir struct {
+	Name  string
+	Prev  *Dir
+	Dirs  []*Dir
+	Files []int
+}
+
+func (d *Dir) GetDirSize() int {
+	size := 0
+	for _, file := range d.Files {
+		size += file
+	}
+	for i := range d.Dirs {
+		dirSize := d.Dirs[i].GetDirSize()
+		size += dirSize
+	}
+	return size
+}
+
+func (d *Dir) ToJson() string {
+	b, err := json.Marshal(d)
+	if err != nil {
+		fmt.Print(d.Name)
+		fmt.Println(err)
+	}
+	return string(b)
+}
+
+func (d *Dir) GetDirSizeMap() map[string]int {
+	m := map[string]int{d.Name: d.GetDirSize()}
+	q := []*Dir{d}
+	for len(q) > 0 {
+		curr := q[0]
+		q = q[1:]
+		for _, dir := range curr.Dirs {
+			if _, ok := m[dir.Name]; !ok {
+				m[dir.Name] = dir.GetDirSize()
+				q = append(q, dir)
+			}
+		}
+	}
+	return m
+}
+
 func part1() {
-	fileName := "test.txt"
+	fileName := "input.txt"
 	file, _ := os.Open(fileName)
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
+	var root Dir
+	curr := &root
 	isRoot := true
-	var curr Dir
-	var prev Dir
-	root := &curr
-	doProcessFiles := false
 	for scanner.Scan() {
 		s := scanner.Text()
+		fmt.Println(s)
+		fmt.Printf("curr: %v\n", curr.ToJson())
 		if isRoot {
-			fmt.Println("init root as current <--" + s)
-			curr = newDir(s, &prev)
+			root = Dir{Name: "/", Files: []int{}, Dirs: []*Dir{}}
 			isRoot = false
 			continue
 		}
-
 		arr := strings.Split(s, " ")
-		if doProcessFiles && arr[0] == "$" {
-			fmt.Println("End of processing file <--" + s)
-			doProcessFiles = false
-		} else if doProcessFiles {
-			fmt.Println("handleFile <--" + s)
-			handleFileOrDir(&curr, arr[0], arr[1])
+		if s == "$ cd .." {
+			curr = curr.Prev
+			continue
 		}
-		if arr[0] == "$" {
-			if arr[1] == "cd" {
-				fmt.Println("handle cd <--" + s)
-				handleCD(&prev, &curr, s)
-			} else if arr[1] == "ls" {
-				fmt.Println("handle ls <--" + s)
-				doProcessFiles = true
+		if strings.HasPrefix(s, "$ cd") {
+			fmt.Println(curr.Dirs)
+			for i := range curr.Dirs {
+				if strings.HasSuffix(curr.Dirs[i].Name, arr[2]+"/") {
+					temp := curr
+					curr = curr.Dirs[i]
+					curr.Prev = temp
+					break
+				}
 			}
+			continue
 		}
-		// fmt.Println(s)
+		if s == "$ ls" {
+			continue
+		}
+		if strings.HasPrefix(s, "dir") {
+			next := Dir{Name: curr.Name + arr[1] + "/", Files: []int{}, Dirs: []*Dir{}}
+			curr.Dirs = append(curr.Dirs, &next)
+			continue
+		}
+		// is file
+		size, _ := strconv.Atoi(arr[0])
+		curr.Files = append(curr.Files, size)
 	}
-	mar, _ := json.Marshal(curr)
-	fmt.Println(mar)
-	fmt.Println(root.getTotalSize(100000))
-
+	m := root.GetDirSizeMap()
+	total := 0
+	for k, v := range m {
+		if v <= 100000 {
+			fmt.Printf("key: %s value: %v\n", k, v)
+			total += v
+		}
+	}
+	fmt.Print("Total: ")
+	fmt.Println(total)
+	// fmt.Println(m)
 }
 
 func part2() {
