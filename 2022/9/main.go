@@ -72,7 +72,7 @@ func main() {
 		knots = append(knots, Knot{Curr: Coordinate{0, 0}, Visited: []Coordinate{{0, 0}}})
 	}
 
-	file, _ := os.Open("C:\\Users\\Alvin\\Personal Projects\\aoc\\2022\\9\\input.txt")
+	file, _ := os.Open("input.txt")
 	fileScanner := bufio.NewScanner(file)
 	fileScanner.Split(bufio.ScanLines)
 	for fileScanner.Scan() {
