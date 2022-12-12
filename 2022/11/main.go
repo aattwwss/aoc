@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+var LCM = 1
+
 type Test struct {
 	DivisibleValue int
 	IfTrue         int
@@ -15,6 +17,7 @@ type Test struct {
 }
 
 func (t Test) doTest(n int) int {
+
 	if n >= t.DivisibleValue && n%t.DivisibleValue == 0 {
 		return t.IfTrue
 	}
@@ -49,6 +52,7 @@ func NewOperation(s string) Operation {
 }
 
 func (o Operation) doOperation(old int) int {
+	old = old % LCM // part 2
 	var value int
 	if o.Value == "old" {
 		value = old
@@ -79,7 +83,7 @@ func (m *Monkey) throw() (int, int) {
 	item := m.Items[0]
 	m.Items = m.Items[1:]
 
-	newItem := m.Operation.doOperation(item) / 1
+	newItem := m.Operation.doOperation(item) / 1 // Remove division by 3 in part 2
 	monkeyToThrowTo := m.Test.doTest(newItem)
 
 	return monkeyToThrowTo, newItem
@@ -102,11 +106,15 @@ func NewMonkey(s string) Monkey {
 func main() {
 	var monkeys []Monkey
 
-	fileName := "C:\\Users\\Alvin\\Personal Projects\\aoc\\2022\\11\\test.txt"
+	fileName := "C:\\Users\\Alvin\\Personal Projects\\aoc\\2022\\11\\input.txt"
 	content, _ := os.ReadFile(fileName)
 	lines := strings.Split(string(content), "\n\n")
 	for _, line := range lines {
 		monkeys = append(monkeys, NewMonkey(line))
+	}
+
+	for _, monkey := range monkeys {
+		LCM *= monkey.Test.DivisibleValue
 	}
 
 	rounds := 10000
