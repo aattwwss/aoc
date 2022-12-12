@@ -54,7 +54,7 @@ func (o Operation) doOperation(old int) int {
 		value = old
 	} else {
 		v, _ := strconv.Atoi(o.Value)
-		value = int(v)
+		value = v
 	}
 
 	if o.Operator == "*" {
@@ -91,7 +91,7 @@ func NewMonkey(s string) Monkey {
 	lines := strings.Split(s, "\n")
 	for _, level := range strings.Split(strings.Split(lines[1], ": ")[1], ", ") {
 		levelInt, _ := strconv.Atoi(level)
-		items = append(items, int(levelInt))
+		items = append(items, levelInt)
 	}
 	operation := NewOperation(lines[2])
 	test := NewTest(lines[3], lines[4], lines[5])
@@ -113,7 +113,7 @@ func main() {
 
 	for n := 0; n < rounds; n++ {
 		for i := range monkeys {
-			for _ = range monkeys[i].Items {
+			for range monkeys[i].Items {
 				monkeyToThrowTo, newItem := monkeys[i].throw()
 				monkeys[monkeyToThrowTo].Items = append(monkeys[monkeyToThrowTo].Items, newItem)
 			}
