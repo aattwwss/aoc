@@ -106,7 +106,7 @@ func NewMonkey(s string) Monkey {
 func main() {
 	var monkeys []Monkey
 
-	fileName := "C:\\Users\\Alvin\\Personal Projects\\aoc\\2022\\11\\input.txt"
+	fileName := "input.txt"
 	content, _ := os.ReadFile(fileName)
 	lines := strings.Split(string(content), "\n\n")
 	for _, line := range lines {
